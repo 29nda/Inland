@@ -1,0 +1,109 @@
+---
+/**
+ * Seluruh isi <head>: SEO, hreflang, Open Graph, dan data terstruktur.
+ *
+ * Dua hal yang dijaga di sini:
+ *  1. Semua URL absolut dibangun dari Astro.site, bukan ditulis tangan,
+ *     sehingga pindah dari pages.dev ke inland.co.id tidak menyisakan
+ *     alamat lama yang terselip.
+ *  2. Di staging, seluruh halaman diberi noindex supaya salinan ini
+ *     tidak pernah bersaing dengan situs asli di Google.
+ */
+import { site } from '../config/site';
+import { pasangan, type Bahasa } from '../i18n/rute';
+
+interface Props {
+  judul: string;
+  deskripsi: string;
+  bahasa: Bahasa;
+  /** Kunci rute, untuk membangun tautan hreflang. */
+  kunciRute: string;
+  /** Alamat gambar pratinjau saat dibagikan. */
+  gambar?: string;
+  tipe?: 'website' | 'article';
+}
+
+const { judul, deskripsi, bahasa, kunciRute, gambar, tipe = 'website' } = Astro.props;
+
+const dasar = Astro.site ?? new URL('https://inland.pages.dev');
+const abs = (jalur: string) => new URL(jalur, dasar).href;
+
+const kanonik = abs(Astro.url.pathname);
+const alt = pasangan(kunciRute);
+
+// Situs dianggap produksi hanya bila SITE_URL diarahkan ke domain asli.
+const produksi = dasar.hostname === 'inland.co.id' || dasar.hostname === 'www.inland.co.id';
+
+const judulPenuh = kunciRute === 'beranda'
+  ? `${site.nama} — ${site.tagline[bahasa]}`
+  : `${judul} | ${site.nama}`;
+
+const gambarOg = abs(gambar ?? '/og-default.png');
+
+// --- Data terstruktur -------------------------------------------------
+// Fakta yang masih kosong sengaja tidak ditulis, karena data terstruktur
+// yang berisi nilai kosong lebih merugikan daripada tidak ada sama sekali.
+const punyaAlamat = Boolean(site.kontak.alamat.jalan && site.kontak.alamat.kota);
+
+const organisasi: Record<string, unknown> = {
+  '@context': 'https://schema.org',
+  '@type': 'GeneralContractor',
+  '@id': abs('/#organisasi'),
+  name: site.nama,
+  legalName: site.namaLengkap,
+  url: abs('/'),
+  logo: abs('/logo-inland.png'),
+  description: deskripsi,
+  email: site.kontak.email,
+  telephone: `+${site.kontak.whatsapp}`,
+};
+
+if (punyaAlamat) {
+  organisasi.address = {
+    '@type': 'PostalAddress',
+    streetAddress: site.kontak.alamat.jalan,
+    addressLocality: site.kontak.alamat.kota,
+    addressRegion: site.kontak.alamat.provinsi,
+    postalCode: site.kontak.alamat.kodePos,
+    addressCountry: site.kontak.alamat.negara,
+  };
+}
+if (site.fakta.tahunBerdiri) organisasi.foundingDate = String(site.fakta.tahunBerdiri);
+if (site.fakta.wilayahLayanan.length) {
+  organisasi.areaServed = site.fakta.wilayahLayanan.map((w) => ({ '@type': 'Place', name: w }));
+}
+const sosial = Object.values(site.sosial).filter(Boolean);
+if (sosial.length) organisasi.sameAs = sosial;
+---
+
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="generator" content={Astro.generator} />
+
+<title>{judulPenuh}</title>
+<meta name="description" content={deskripsi} />
+<link rel="canonical" href={kanonik} />
+
+{/* Staging tidak boleh diindeks. Dihapus otomatis begitu SITE_URL
+    diarahkan ke inland.co.id — tidak ada yang perlu diingat manual. */}
+{!produksi && <meta name="robots" content="noindex, nofollow" />}
+
+{/* Memberi tahu Google bahwa kedua versi bahasa adalah halaman yang sama */}
+<link rel="alternate" hreflang="id" href={abs(alt.id)} />
+<link rel="alternate" hreflang="en" href={abs(alt.en)} />
+<link rel="alternate" hreflang="x-default" href={abs(alt.id)} />
+
+<meta property="og:type" content={tipe} />
+<meta property="og:site_name" content={site.nama} />
+<meta property="og:locale" content={bahasa === 'id' ? 'id_ID' : 'en_US'} />
+<meta property="og:title" content={judulPenuh} />
+<meta property="og:description" content={deskripsi} />
+<meta property="og:url" content={kanonik} />
+<meta property="og:image" content={gambarOg} />
+<meta name="twitter:card" content="summary_large_image" />
+
+<link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+<link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+<link rel="sitemap" href="/sitemap-index.xml" />
+
+<script type="application/ld+json" set:html={JSON.stringify(organisasi)} is:inline />

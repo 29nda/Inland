@@ -1,0 +1,52 @@
+---
+import { getCollection } from 'astro:content';
+import Dasar from '../layouts/Dasar.astro';
+import Gambar from '../components/Gambar.astro';
+import { isi } from '../config/isi';
+import type { Bahasa } from '../i18n/rute';
+import { t } from '../i18n/teks';
+
+interface Props { bahasa: Bahasa; }
+const { bahasa } = Astro.props;
+const tr = t(bahasa);
+const c = isi[bahasa].proyek;
+
+const daftar = (await getCollection('proyek')).sort(
+  (a, b) => b.data.tahun - a.data.tahun || a.data.urutan - b.data.urutan,
+);
+---
+
+<Dasar judul={c.judul} deskripsi={c.metaDeskripsi} {bahasa} kunciRute="proyek">
+  <section class="bagian">
+    <div class="wrap">
+      <p class="kicker">{c.kicker}</p>
+      <h1>{c.judul}</h1>
+      <p class="timbal prosa">{c.timbal}</p>
+
+      {daftar.length > 0 ? (
+        <div class="grid grid--3 daftar">
+          {daftar.map((p) => (
+            <article class="kartu">
+              <Gambar src={p.data.sampul} alt={p.data.judul} rasio="4 / 3" {bahasa} />
+              <h2>{bahasa === 'en' && p.data.judulEn ? p.data.judulEn : p.data.judul}</h2>
+              <p class="kartu__meta">{p.data.lokasi} · {p.data.tahun}</p>
+              <p class="kartu__ringkas">
+                {bahasa === 'en' && p.data.ringkasanEn ? p.data.ringkasanEn : p.data.ringkasan}
+              </p>
+            </article>
+          ))}
+        </div>
+      ) : (
+        <p class="timbal">{tr('proyek.kosong')}</p>
+      )}
+    </div>
+  </section>
+</Dasar>
+
+<style>
+  h1 { margin-bottom: var(--s3); }
+  .daftar { margin-top: var(--s5); }
+  .kartu h2 { font-size: 1.125rem; margin-top: var(--s2); }
+  .kartu__meta { font-size: var(--t-kecil); color: var(--tinta-45); margin-bottom: var(--s1); }
+  .kartu__ringkas { color: var(--tinta-70); font-size: 0.9375rem; }
+</style>

@@ -1,0 +1,189 @@
+---
+import { Image } from 'astro:assets';
+import logo from '../assets/logo-inland.webp';
+import { site, tautanWhatsApp } from '../config/site';
+import { menuUtama, pasangan, type Bahasa } from '../i18n/rute';
+import { t } from '../i18n/teks';
+
+interface Props { bahasa: Bahasa; kunciAktif: string; }
+const { bahasa, kunciAktif } = Astro.props;
+const tr = t(bahasa);
+const lain: Bahasa = bahasa === 'id' ? 'en' : 'id';
+const tautanBahasaLain = pasangan(kunciAktif)[lain];
+---
+
+<header class="situs-header">
+  <div class="wrap situs-header__isi">
+    <a href={bahasa === 'id' ? '/' : '/en/'} class="merek" aria-label={site.nama}>
+      <Image src={logo} alt={site.namaLengkap} widths={[190, 380]} sizes="(min-width: 620px) 190px, 150px" loading="eager" />
+    </a>
+
+    <nav class="nav" aria-label="Menu utama">
+      <ul class="nav__daftar">
+        {menuUtama.map((r) => (
+          <li>
+            <a
+              href={r[bahasa]}
+              class:list={['nav__tautan', { 'nav__tautan--aktif': r.kunci === kunciAktif }]}
+              aria-current={r.kunci === kunciAktif ? 'page' : undefined}
+            >
+              {tr(`nav.${r.kunci}` as any)}
+            </a>
+          </li>
+        ))}
+      </ul>
+    </nav>
+
+    <div class="situs-header__aksi">
+      <a href={tautanBahasaLain} class="ganti-bahasa" hreflang={lain} lang={lain}>
+        {lain.toUpperCase()}
+      </a>
+      <a href={tautanWhatsApp()} class="tombol tombol--utama tombol--kecil" rel="noopener" target="_blank">
+        {tr('cta.whatsapp')}
+      </a>
+    </div>
+
+    <button class="pemicu" type="button" aria-expanded="false" aria-controls="nav-mobil">
+      <span class="sr">{tr('nav.buka')}</span>
+      <span class="pemicu__garis" aria-hidden="true"></span>
+      <span class="pemicu__garis" aria-hidden="true"></span>
+    </button>
+  </div>
+
+  <div class="nav-mobil" id="nav-mobil" hidden>
+    <ul>
+      {menuUtama.map((r) => (
+        <li><a href={r[bahasa]}>{tr(`nav.${r.kunci}` as any)}</a></li>
+      ))}
+      <li><a href={tautanBahasaLain} hreflang={lain} lang={lain}>{tr('bahasa.ganti')}</a></li>
+    </ul>
+    <a href={tautanWhatsApp()} class="tombol tombol--utama" rel="noopener" target="_blank">
+      {tr('cta.whatsapp')}
+    </a>
+  </div>
+</header>
+
+<style>
+  .situs-header {
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    background: color-mix(in oklab, var(--kertas) 88%, transparent);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--garis);
+  }
+
+  .situs-header__isi {
+    display: flex;
+    align-items: center;
+    gap: var(--s3);
+    min-height: 68px;
+  }
+
+  .merek { flex: none; margin-right: auto; text-decoration: none; }
+  .merek :global(img) { width: 150px; height: auto; }
+  @media (min-width: 620px) { .merek :global(img) { width: 190px; } }
+
+  .nav { display: none; }
+  .nav__daftar { display: flex; gap: var(--s3); list-style: none; margin: 0; padding: 0; }
+
+  .nav__tautan {
+    position: relative;
+    font-size: 0.9375rem;
+    font-weight: 500;
+    text-decoration: none;
+    padding-block: 0.35em;
+    color: var(--tinta-70);
+    transition: color var(--transisi);
+  }
+  .nav__tautan:hover { color: var(--tinta); }
+
+  .nav__tautan--aktif { color: var(--tinta); font-weight: 600; }
+  .nav__tautan--aktif::after {
+    content: '';
+    position: absolute;
+    left: 0; right: 0; bottom: -2px;
+    height: 2px;
+    background: var(--oranye);
+  }
+
+  .situs-header__aksi { display: none; align-items: center; gap: var(--s2); }
+
+  .ganti-bahasa {
+    font-size: var(--t-kecil);
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-decoration: none;
+    color: var(--tinta-45);
+    padding: 0.4em 0.6em;
+    border: 1px solid var(--garis);
+    border-radius: var(--radius);
+    transition: color var(--transisi), border-color var(--transisi);
+  }
+  .ganti-bahasa:hover { color: var(--tinta); border-color: var(--tinta-45); }
+
+  .tombol--kecil { padding: 0.65em 1.15em; font-size: 0.9375rem; }
+
+  /* --- Pemicu menu mobil --- */
+  .pemicu {
+    display: grid;
+    place-content: center;
+    gap: 5px;
+    width: 44px; height: 44px;
+    margin-right: calc(var(--s1) * -1);
+    background: none;
+    border: 0;
+    cursor: pointer;
+  }
+  .pemicu__garis {
+    display: block;
+    width: 22px; height: 2px;
+    background: var(--tinta);
+    transition: transform var(--transisi), opacity var(--transisi);
+  }
+  .pemicu[aria-expanded='true'] .pemicu__garis:first-child { transform: translateY(3.5px) rotate(45deg); }
+  .pemicu[aria-expanded='true'] .pemicu__garis:last-child { transform: translateY(-3.5px) rotate(-45deg); }
+
+  .nav-mobil {
+    border-top: 1px solid var(--garis);
+    padding: var(--s3) var(--gutter) var(--s4);
+    background: var(--kertas);
+  }
+  .nav-mobil[hidden] { display: none; }
+  .nav-mobil ul { list-style: none; margin: 0 0 var(--s3); padding: 0; }
+  .nav-mobil li + li { border-top: 1px solid var(--garis); }
+  .nav-mobil a {
+    display: block;
+    padding: 0.85em 0;
+    font-size: 1.125rem;
+    font-weight: 500;
+    text-decoration: none;
+  }
+  .nav-mobil .tombol { width: 100%; justify-content: center; }
+
+  @media (min-width: 620px) { .situs-header__isi { min-height: 76px; } }
+
+  @media (min-width: 1000px) {
+    .nav, .situs-header__aksi { display: flex; }
+    .pemicu, .nav-mobil { display: none; }
+  }
+</style>
+
+<script>
+  const pemicu = document.querySelector<HTMLButtonElement>('.pemicu');
+  const panel = document.getElementById('nav-mobil');
+
+  pemicu?.addEventListener('click', () => {
+    const terbuka = pemicu.getAttribute('aria-expanded') === 'true';
+    pemicu.setAttribute('aria-expanded', String(!terbuka));
+    if (panel) panel.hidden = terbuka;
+  });
+
+  // Tutup panel bila layar melebar ke tampilan desktop
+  matchMedia('(min-width: 1000px)').addEventListener('change', (e) => {
+    if (e.matches && panel) {
+      panel.hidden = true;
+      pemicu?.setAttribute('aria-expanded', 'false');
+    }
+  });
+</script>

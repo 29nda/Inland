@@ -1,0 +1,89 @@
+---
+/**
+ * Penampung gambar.
+ *
+ * Selama foto asli belum ada, komponen ini menggambar kotak bermotif
+ * dengan rasio yang benar — sehingga tata letaknya sudah final dan
+ * tidak bergeser ketika foto sungguhan dimasukkan nanti.
+ *
+ * Cara menukar: isi prop `src` dengan hasil import dari src/assets/.
+ */
+import { Image } from 'astro:assets';
+import type { ImageMetadata } from 'astro';
+import type { Bahasa } from '../i18n/rute';
+import { t } from '../i18n/teks';
+
+interface Props {
+  src?: ImageMetadata;
+  alt?: string;
+  rasio?: string;
+  bahasa?: Bahasa;
+  sizes?: string;
+  loading?: 'eager' | 'lazy';
+  label?: string;
+}
+
+const {
+  src,
+  alt = '',
+  rasio = '4 / 3',
+  bahasa = 'id',
+  sizes = '(min-width: 900px) 33vw, 100vw',
+  loading = 'lazy',
+  label,
+} = Astro.props;
+
+const tr = t(bahasa);
+---
+
+{src ? (
+  <Image
+    src={src}
+    alt={alt}
+    sizes={sizes}
+    loading={loading}
+    class="gambar"
+    style={`--rasio:${rasio}`}
+  />
+) : (
+  <div class="kosong" style={`--rasio:${rasio}`} role="img" aria-label={alt || tr('gambar.menyusul')}>
+    <span class="kosong__label">{label ?? tr('gambar.menyusul')}</span>
+  </div>
+)}
+
+<style>
+  .gambar {
+    width: 100%;
+    height: auto;
+    aspect-ratio: var(--rasio, 4 / 3);
+    object-fit: cover;
+    border-radius: var(--radius);
+  }
+
+  .kosong {
+    width: 100%;
+    aspect-ratio: var(--rasio, 4 / 3);
+    display: grid;
+    place-items: center;
+    border-radius: var(--radius);
+    border: 1px dashed color-mix(in oklab, var(--oranye) 40%, var(--garis));
+    background:
+      repeating-linear-gradient(
+        135deg,
+        transparent 0 10px,
+        color-mix(in oklab, var(--oranye) 7%, transparent) 10px 20px
+      ),
+      var(--oranye-halus);
+  }
+
+  .kosong__label {
+    font-size: var(--t-kecil);
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--oranye-gelap);
+    background: color-mix(in oklab, var(--kertas) 88%, transparent);
+    padding: 0.45em 0.9em;
+    border-radius: 999px;
+  }
+</style>

@@ -1,0 +1,16 @@
+<!-- Favicon sementara: sederhanaan dari ikon gedung pada logo.
+     Ganti bila berkas vektor logo yang asli sudah tersedia. -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" role="img" aria-label="Inland">
+  <defs>
+    <linearGradient id="o" x1="0" y1="1" x2="0" y2="0">
+      <stop offset="0" stop-color="#975122"/>
+      <stop offset="1" stop-color="#FF9A3B"/>
+    </linearGradient>
+  </defs>
+  <rect width="32" height="32" rx="6" fill="#241A12"/>
+  <g fill="url(#o)">
+    <rect x="7"  y="17" width="4" height="9" rx="1"/>
+    <rect x="13" y="12" width="4" height="14" rx="1"/>
+    <rect x="19" y="6"  width="4" height="20" rx="1"/>
+  </g>
+</svg>

@@ -1,0 +1,17 @@
+node_modules/
+dist/
+.astro/
+.cache/
+
+.env
+.env.*
+!.env.example
+
+.DS_Store
+.vscode/
+.idea/
+.wrangler/
+
+# Hasil panen dari situs lama — besar dan bisa diambil ulang
+export/
+mirror/

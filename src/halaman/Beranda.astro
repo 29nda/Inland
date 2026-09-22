@@ -1,0 +1,187 @@
+---
+import { getCollection } from 'astro:content';
+import Dasar from '../layouts/Dasar.astro';
+import Gambar from '../components/Gambar.astro';
+import { isi } from '../config/isi';
+import { site, tautanWhatsApp } from '../config/site';
+import { jalur, type Bahasa } from '../i18n/rute';
+import { t } from '../i18n/teks';
+
+interface Props { bahasa: Bahasa; }
+const { bahasa } = Astro.props;
+const tr = t(bahasa);
+const c = isi[bahasa].beranda;
+const layanan = isi[bahasa].layananDaftar;
+
+const semua = await getCollection('proyek');
+const unggulan = semua
+  .filter((p) => p.data.unggulan)
+  .sort((a, b) => a.data.urutan - b.data.urutan)
+  .slice(0, 3);
+---
+
+<Dasar judul={c.judul} deskripsi={c.metaDeskripsi} {bahasa} kunciRute="beranda">
+  <section class="hero">
+    <div class="wrap hero__isi">
+      <div class="hero__teks">
+        <p class="kicker">{c.kicker}</p>
+        <h1>{c.judul}</h1>
+        <p class="timbal">{c.timbal}</p>
+        <div class="hero__aksi">
+          <a href={tautanWhatsApp()} class="tombol tombol--utama" rel="noopener" target="_blank">
+            {tr('cta.konsultasi')}
+          </a>
+          <a href={jalur('proyek', bahasa)} class="tombol tombol--garis">{tr('cta.lihatProyek')}</a>
+        </div>
+      </div>
+
+      <div class="hero__gambar">
+        <Gambar rasio="3 / 4" {bahasa} sizes="(min-width: 900px) 45vw, 100vw" loading="eager" />
+      </div>
+    </div>
+  </section>
+
+  {site.fakta.tahunBerdiri || site.fakta.jumlahProyek || site.fakta.wilayahLayanan.length ? (
+    <section class="bagian bagian--rapat bagian--kertas2">
+      <div class="wrap angka">
+        {site.fakta.tahunBerdiri && (
+          <div class="angka__item">
+            <span class="angka__nilai">{new Date().getFullYear() - site.fakta.tahunBerdiri}</span>
+            <span class="angka__label">{bahasa === 'id' ? 'Tahun pengalaman' : 'Years of experience'}</span>
+          </div>
+        )}
+        {site.fakta.jumlahProyek && (
+          <div class="angka__item">
+            <span class="angka__nilai">{site.fakta.jumlahProyek}+</span>
+            <span class="angka__label">{bahasa === 'id' ? 'Proyek selesai' : 'Projects completed'}</span>
+          </div>
+        )}
+        {site.fakta.wilayahLayanan.length > 0 && (
+          <div class="angka__item">
+            <span class="angka__nilai">{site.fakta.wilayahLayanan.length}</span>
+            <span class="angka__label">{bahasa === 'id' ? 'Wilayah layanan' : 'Areas served'}</span>
+          </div>
+        )}
+      </div>
+    </section>
+  ) : null}
+
+  <section class="bagian">
+    <div class="wrap">
+      <p class="kicker">{c.layananKicker}</p>
+      <h2>{c.layananJudul}</h2>
+
+      <div class="grid grid--3 layanan">
+        {layanan.map((l) => (
+          <article class="kartu">
+            <span class="kartu__nomor">{l.nomor}</span>
+            <h3>{l.judul}</h3>
+            <p>{l.teks}</p>
+          </article>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <section class="bagian bagian--kertas2">
+    <div class="wrap">
+      <div class="kepala-baris">
+        <div>
+          <p class="kicker">{c.proyekKicker}</p>
+          <h2>{c.proyekJudul}</h2>
+        </div>
+        <a href={jalur('proyek', bahasa)} class="tombol tombol--garis">{tr('cta.semuaProyek')}</a>
+      </div>
+
+      {unggulan.length > 0 ? (
+        <div class="grid grid--3 proyek-grid">
+          {unggulan.map((p) => (
+            <article class="proyek-kartu">
+              <Gambar src={p.data.sampul} alt={p.data.judul} rasio="4 / 3" {bahasa} />
+              <h3>{bahasa === 'en' && p.data.judulEn ? p.data.judulEn : p.data.judul}</h3>
+              <p class="proyek-kartu__meta">{p.data.lokasi} · {p.data.tahun}</p>
+            </article>
+          ))}
+        </div>
+      ) : (
+        <p class="timbal">{tr('proyek.kosong')}</p>
+      )}
+    </div>
+  </section>
+
+  <section class="bagian bagian--tinta">
+    <div class="wrap ajakan">
+      <div>
+        <h2>{c.ctaJudul}</h2>
+        <p class="timbal">{c.ctaTimbal}</p>
+      </div>
+      <a href={tautanWhatsApp()} class="tombol tombol--utama" rel="noopener" target="_blank">
+        {tr('cta.whatsapp')}
+      </a>
+    </div>
+  </section>
+</Dasar>
+
+<style>
+  .hero { padding-block: var(--s4) var(--s5); }
+  .hero__isi { display: grid; gap: var(--s4); align-items: center; }
+  @media (min-width: 900px) {
+    .hero__isi { grid-template-columns: 1.15fr 0.85fr; gap: var(--s5); }
+  }
+  .hero__teks { max-width: 40ch; }
+  .hero h1 { margin-bottom: var(--s3); }
+  .hero__aksi { display: flex; flex-wrap: wrap; gap: var(--s2); margin-top: var(--s4); }
+  /* Di ponsel judul harus terlihat lebih dulu; foto menyusul di bawahnya. */
+  .hero__gambar :global(.gambar),
+  .hero__gambar :global(.kosong) { --rasio: 4 / 3; }
+  @media (min-width: 900px) {
+    .hero__gambar :global(.gambar),
+    .hero__gambar :global(.kosong) { --rasio: 3 / 4; }
+  }
+
+  .angka { display: grid; gap: var(--s3); grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); }
+  .angka__item { display: grid; gap: 0.25em; }
+  .angka__nilai { font-size: var(--t-judul); font-weight: 700; color: var(--oranye-gelap); line-height: 1; }
+  .angka__label { font-size: var(--t-kecil); color: var(--tinta-70); }
+
+  .layanan { margin-top: var(--s4); }
+  .kartu {
+    padding: var(--s3);
+    background: var(--putih);
+    border: 1px solid var(--garis);
+    border-radius: var(--radius);
+    border-top: 3px solid var(--oranye);
+  }
+  .kartu__nomor {
+    display: block;
+    font-size: var(--t-kecil);
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    color: var(--oranye);
+    margin-bottom: var(--s2);
+  }
+  .kartu h3 { margin-bottom: var(--s1); }
+  .kartu p { color: var(--tinta-70); }
+
+  .kepala-baris {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--s3);
+    align-items: end;
+    justify-content: space-between;
+    margin-bottom: var(--s4);
+  }
+
+  .proyek-kartu h3 { font-size: 1.125rem; margin-top: var(--s2); }
+  .proyek-kartu__meta { font-size: var(--t-kecil); color: var(--tinta-45); }
+
+  .ajakan {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--s3);
+    align-items: center;
+    justify-content: space-between;
+  }
+  .ajakan > div { max-width: 46ch; }
+  .ajakan h2 { margin-bottom: var(--s2); }
+</style>

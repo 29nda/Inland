@@ -1,0 +1,76 @@
+---
+import '@fontsource-variable/plus-jakarta-sans';
+import '../styles/global.css';
+
+import Kepala from '../components/Kepala.astro';
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+import type { Bahasa } from '../i18n/rute';
+
+interface Props {
+  judul: string;
+  deskripsi: string;
+  bahasa: Bahasa;
+  kunciRute: string;
+  gambar?: string;
+}
+
+const { judul, deskripsi, bahasa, kunciRute, gambar } = Astro.props;
+
+const dasar = Astro.site ?? new URL('https://inland.pages.dev');
+const produksi = dasar.hostname === 'inland.co.id' || dasar.hostname === 'www.inland.co.id';
+---
+
+<!doctype html>
+<html lang={bahasa === 'id' ? 'id-ID' : 'en-US'}>
+  <head>
+    <Kepala {judul} {deskripsi} {bahasa} {kunciRute} {gambar} />
+  </head>
+
+  <body>
+    <a href="#konten" class="lompat">
+      {bahasa === 'id' ? 'Lewati ke konten utama' : 'Skip to main content'}
+    </a>
+
+    {!produksi && (
+      <div class="pratinjau">
+        <strong>Pratinjau</strong>
+        <span>Teks dan foto belum final. Belum terindeks Google.</span>
+      </div>
+    )}
+
+    <Header {bahasa} kunciAktif={kunciRute} />
+
+    <main id="konten">
+      <slot />
+    </main>
+
+    <Footer {bahasa} />
+
+    <style>
+      body { display: flex; flex-direction: column; min-height: 100vh; }
+      main { flex: 1; }
+
+      /* Penanda staging. Hilang sendiri begitu SITE_URL diarahkan
+         ke inland.co.id — tidak perlu dihapus manual. */
+      .pratinjau {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: baseline;
+        justify-content: center;
+        gap: 0.5em;
+        padding: 0.5em var(--gutter);
+        background: var(--tinta);
+        color: var(--kertas);
+        font-size: var(--t-kecil);
+        text-align: center;
+      }
+      .pratinjau strong {
+        color: var(--oranye-terang);
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        font-size: 0.75rem;
+      }
+    </style>
+  </body>
+</html>

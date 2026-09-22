@@ -1,0 +1,60 @@
+---
+import Dasar from '../layouts/Dasar.astro';
+import { isi } from '../config/isi';
+import { tautanWhatsApp } from '../config/site';
+import type { Bahasa } from '../i18n/rute';
+import { t } from '../i18n/teks';
+
+interface Props { bahasa: Bahasa; }
+const { bahasa } = Astro.props;
+const tr = t(bahasa);
+const c = isi[bahasa].layanan;
+const daftar = isi[bahasa].layananDaftar;
+---
+
+<Dasar judul={c.judul} deskripsi={c.metaDeskripsi} {bahasa} kunciRute="layanan">
+  <section class="bagian">
+    <div class="wrap">
+      <p class="kicker">{c.kicker}</p>
+      <h1>{c.judul}</h1>
+      <p class="timbal prosa">{c.timbal}</p>
+
+      <div class="daftar">
+        {daftar.map((l) => (
+          <article class="baris">
+            <span class="baris__nomor">{l.nomor}</span>
+            <div>
+              <h2>{l.judul}</h2>
+              <p class="prosa">{l.teks}</p>
+            </div>
+          </article>
+        ))}
+      </div>
+
+      <a href={tautanWhatsApp()} class="tombol tombol--utama" rel="noopener" target="_blank">
+        {tr('cta.konsultasi')}
+      </a>
+    </div>
+  </section>
+</Dasar>
+
+<style>
+  h1 { margin-bottom: var(--s3); }
+  .daftar { margin-block: var(--s5) var(--s4); }
+  .baris {
+    display: grid;
+    gap: var(--s2);
+    padding-block: var(--s4);
+    border-top: 1px solid var(--garis);
+  }
+  .baris:last-child { border-bottom: 1px solid var(--garis); }
+  @media (min-width: 760px) { .baris { grid-template-columns: 6rem 1fr; gap: var(--s4); } }
+  .baris__nomor {
+    font-size: var(--t-kecil);
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    color: var(--oranye);
+  }
+  .baris h2 { font-size: var(--t-sub); margin-bottom: var(--s1); }
+  .baris p { color: var(--tinta-70); }
+</style>

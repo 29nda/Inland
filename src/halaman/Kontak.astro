@@ -1,0 +1,63 @@
+---
+import Dasar from '../layouts/Dasar.astro';
+import { isi } from '../config/isi';
+import { site, tautanWhatsApp } from '../config/site';
+import type { Bahasa } from '../i18n/rute';
+import { t } from '../i18n/teks';
+
+interface Props { bahasa: Bahasa; }
+const { bahasa } = Astro.props;
+const tr = t(bahasa);
+const c = isi[bahasa].kontak;
+const a = site.kontak.alamat;
+const alamatLengkap = [a.jalan, a.kota, a.provinsi, a.kodePos].filter(Boolean).join(', ');
+---
+
+<Dasar judul={c.judul} deskripsi={c.metaDeskripsi} {bahasa} kunciRute="kontak">
+  <section class="bagian">
+    <div class="wrap kontak">
+      <div>
+        <p class="kicker">{c.kicker}</p>
+        <h1>{c.judul}</h1>
+        <p class="timbal prosa">{c.timbal}</p>
+        <a href={tautanWhatsApp()} class="tombol tombol--utama" rel="noopener" target="_blank">
+          {tr('cta.whatsapp')}
+        </a>
+      </div>
+
+      <dl class="rincian">
+        {alamatLengkap && (
+          <>
+            <dt>{bahasa === 'id' ? 'Alamat' : 'Address'}</dt>
+            <dd>{alamatLengkap}</dd>
+          </>
+        )}
+        <dt>WhatsApp</dt>
+        <dd>
+          <a href={tautanWhatsApp()} rel="noopener" target="_blank">+{site.kontak.whatsapp}</a>
+        </dd>
+        <dt>Email</dt>
+        <dd><a href={`mailto:${site.kontak.email}`}>{site.kontak.email}</a></dd>
+      </dl>
+    </div>
+  </section>
+</Dasar>
+
+<style>
+  h1 { margin-bottom: var(--s3); }
+  .kontak { display: grid; gap: var(--s5); }
+  @media (min-width: 860px) { .kontak { grid-template-columns: 1.15fr 0.85fr; } }
+  .kontak .tombol { margin-top: var(--s4); }
+
+  .rincian { margin: 0; display: grid; gap: 0; align-self: start; }
+  .rincian dt {
+    font-size: var(--t-kecil);
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--oranye-gelap);
+    padding-top: var(--s3);
+    border-top: 1px solid var(--garis);
+  }
+  .rincian dd { margin: 0.35em 0 var(--s3); }
+</style>

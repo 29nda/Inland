@@ -1,0 +1,40 @@
+---
+import Dasar from '../layouts/Dasar.astro';
+import Gambar from '../components/Gambar.astro';
+import { isi } from '../config/isi';
+import { site } from '../config/site';
+import type { Bahasa } from '../i18n/rute';
+
+interface Props { bahasa: Bahasa; }
+const { bahasa } = Astro.props;
+const c = isi[bahasa].tentang;
+---
+
+<Dasar judul={c.judul} deskripsi={c.metaDeskripsi} {bahasa} kunciRute="tentang">
+  <section class="bagian">
+    <div class="wrap">
+      <p class="kicker">{c.kicker}</p>
+      <h1>{c.judul}</h1>
+      <p class="timbal prosa">{c.timbal}</p>
+
+      <div class="isi">
+        <div class="prosa">
+          {c.isi.map((p) => <p>{p}</p>)}
+          {site.fakta.wilayahLayanan.length > 0 && (
+            <p>
+              {bahasa === 'id' ? 'Wilayah layanan: ' : 'Areas served: '}
+              {site.fakta.wilayahLayanan.join(', ')}.
+            </p>
+          )}
+        </div>
+        <Gambar rasio="4 / 5" {bahasa} sizes="(min-width: 900px) 40vw, 100vw" />
+      </div>
+    </div>
+  </section>
+</Dasar>
+
+<style>
+  h1 { margin-bottom: var(--s3); }
+  .isi { display: grid; gap: var(--s4); margin-top: var(--s5); }
+  @media (min-width: 900px) { .isi { grid-template-columns: 1.1fr 0.9fr; gap: var(--s5); } }
+</style>

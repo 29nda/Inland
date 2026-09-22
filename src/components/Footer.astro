@@ -1,0 +1,121 @@
+---
+import { Image } from 'astro:assets';
+import logo from '../assets/logo-inland.webp';
+import { site, tautanWhatsApp } from '../config/site';
+import { menuUtama, type Bahasa } from '../i18n/rute';
+import { t } from '../i18n/teks';
+
+interface Props { bahasa: Bahasa; }
+const { bahasa } = Astro.props;
+const tr = t(bahasa);
+const tahun = new Date().getFullYear();
+const a = site.kontak.alamat;
+const alamatLengkap = [a.jalan, a.kota, a.provinsi, a.kodePos].filter(Boolean).join(', ');
+const sosial = Object.entries(site.sosial).filter(([, v]) => v);
+---
+
+<footer class="kaki">
+  <div class="wrap kaki__atas">
+    <div class="kaki__merek">
+      <div class="kaki__alas">
+        <Image src={logo} alt={site.namaLengkap} widths={[170, 340]} sizes="170px" loading="lazy" />
+      </div>
+      <p class="kaki__tagline">{site.tagline[bahasa]}</p>
+    </div>
+
+    <nav class="kaki__kolom" aria-label={tr('footer.perusahaan')}>
+      <h2 class="kaki__judul">{tr('footer.perusahaan')}</h2>
+      <ul>
+        {menuUtama.map((r) => (
+          <li><a href={r[bahasa]}>{tr(`nav.${r.kunci}` as any)}</a></li>
+        ))}
+      </ul>
+    </nav>
+
+    <div class="kaki__kolom">
+      <h2 class="kaki__judul">{tr('footer.kontak')}</h2>
+      <ul>
+        {alamatLengkap && <li>{alamatLengkap}</li>}
+        <li><a href={`mailto:${site.kontak.email}`}>{site.kontak.email}</a></li>
+        <li>
+          <a href={tautanWhatsApp()} rel="noopener" target="_blank">
+            WhatsApp +{site.kontak.whatsapp}
+          </a>
+        </li>
+      </ul>
+      {sosial.length > 0 && (
+        <ul class="kaki__sosial">
+          {sosial.map(([nama, url]) => (
+            <li><a href={url} rel="noopener me" target="_blank">{nama}</a></li>
+          ))}
+        </ul>
+      )}
+    </div>
+  </div>
+
+  <div class="wrap kaki__bawah">
+    <p>&copy; {tahun} {site.namaLengkap}. {tr('footer.hak')}</p>
+  </div>
+</footer>
+
+<style>
+  .kaki {
+    background: var(--tinta);
+    color: color-mix(in oklab, var(--kertas) 82%, transparent);
+    padding-top: var(--s5);
+    margin-top: auto;
+  }
+
+  .kaki__atas {
+    display: grid;
+    gap: var(--s4);
+    padding-bottom: var(--s5);
+  }
+  @media (min-width: 760px) {
+    .kaki__atas { grid-template-columns: 1.4fr 1fr 1.2fr; gap: var(--s3); }
+  }
+
+  /* Logo memuat tagline berwarna gelap yang menghilang di latar gelap ini.
+     Selama versi knockout/vektor belum ada, logo diberi alas terang.
+     Ganti dengan logo versi putih begitu berkas vektornya tersedia. */
+  .kaki__alas {
+    display: inline-block;
+    background: var(--kertas);
+    padding: 0.75rem 1rem;
+    border-radius: var(--radius);
+  }
+  .kaki__merek :global(img) { width: 170px; height: auto; }
+  .kaki__tagline {
+    margin-top: var(--s2);
+    font-size: var(--t-kecil);
+    color: var(--tinta-45);
+    max-width: 30ch;
+  }
+
+  .kaki__judul {
+    font-size: var(--t-kecil);
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--oranye-terang);
+    margin-bottom: var(--s2);
+  }
+
+  .kaki__kolom ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 0.55em; }
+  .kaki__kolom a { text-decoration: none; transition: color var(--transisi); }
+  .kaki__kolom a:hover { color: var(--oranye-terang); }
+
+  .kaki__sosial {
+    margin-top: var(--s3) !important;
+    display: flex !important;
+    gap: var(--s2);
+    text-transform: capitalize;
+  }
+
+  .kaki__bawah {
+    border-top: 1px solid color-mix(in oklab, var(--kertas) 14%, transparent);
+    padding-block: var(--s3);
+    font-size: var(--t-kecil);
+    color: var(--tinta-45);
+  }
+</style>
